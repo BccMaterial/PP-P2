@@ -1,0 +1,95 @@
+%equipamentos.pl
+componente(maquina_a, motor_principal).
+componente(maquina_a, sistema_eletrico).
+componente(sistema_eletrico, sensor_temperatura).
+componente(sistema_eletrico, circuito_controle).
+componente(motor_principal, bomba_oleo).
+componente(motor_principal, eixo_rotacao).
+subcomponente(X, Y) :-
+    componente(X, Y).
+
+subcomponente(X, Y) :-
+    componente(X, Z),
+    subcomponente(Z, Y).
+
+% sintomas.pl
+
+
+% ============================
+% ASSOCIAÇÃO DE SINTOMAS A FALHAS PROVÁVEIS
+% relacao_sintoma_falha(Sintoma, Falha, Confianca)
+% ============================
+
+relacao_sintoma_falha(leitura_inconstante, sensor_inoperante, 0.8).
+relacao_sintoma_falha(ruido, vibracao_excessiva, 0.7).
+relacao_sintoma_falha(fluxo_reduzido, baixa_pressao_oleo, 0.9).
+
+% ============================
+% FALHAS CONHECIDAS (observadas diretamente)
+% falha_observada(Componente, Sintoma)
+% ============================
+falha_observada(sensor_temperatura, leitura_inconstante).
+falha_observada(bomba_oleo, fluxo_reduzido).
+
+
+
+
+%diagnostico.pl
+% ============================
+% FALHAS POSSÍVEIS
+% falha(Falha, Tipo, Severidade)
+% ============================
+falha(superaquecimento, mecanica, alta).
+falha(baixa_pressao_oleo, mecanica, media).
+falha(curto_circuito, eletrica, alta).
+falha(sensor_inoperante, eletrica, baixa).
+falha(vibracao_excessiva, mecanica, media).
+falha(parada_inesperada, geral, alta).
+falha(eixo_desalinhado, mecanica, media).
+
+
+
+falha_possivel(Componente, Falha) :-
+    falha_observada(Componente, Sintoma),
+    relacao_sintoma_falha(Sintoma, Falha, _).
+falha_possivel(Componente, Falha) :-
+    subcomponente(Componente, X),
+    falha_possivel(X, Falha).
+
+
+% ============================
+% RELAÇÕES DE CAUSA E EFEITO
+% causa(FalhaCausa, FalhaConsequencia, Confianca)
+% Confiança: 0.0 a 1.0
+% ============================
+causa(baixa_pressao_oleo, superaquecimento, 0.7).
+causa(curto_circuito, parada_inesperada, 0.9).
+causa(sensor_inoperante, leitura_inconstante, 0.8).
+causa(vibracao_excessiva, eixo_desalinhado, 0.6).
+causa(superaquecimento, parada_inesperada, 0.9).
+
+causa_indireta(F1, F2) :- causa(F1, F2, _).
+causa_indireta(F1, F2) :-
+    causa(F1, F3, _),
+    causa_indireta(F3, F2).
+
+causa_raiz(Maquina, FalhaRaiz) :-
+    falha_possivel(Maquina, FalhaRaiz),
+    \+ causa_indireta(_, FalhaRaiz).
+% ============================
+% SINTOMAS OBSERVADOS
+% sintoma(Componente, Sintoma)
+% ============================
+sintoma(sensor_temperatura, leitura_inconstante).
+sintoma(eixo_rotacao, ruido).
+sintoma(bomba_oleo, fluxo_reduzido).
+
+diagnostico(Componente, Falha, Confianca) :-
+    falha_observada(Componente, Sintoma),
+    relacao_sintoma_falha(Sintoma, Falha, Conf),
+    Confianca is Conf * 100.
+
+diagnostico(Componente, Falha, Confianca) :-
+    subcomponente(Componente, Sub),
+    diagnostico(Sub, Falha, ConfSub),
+    Confianca is ConfSub * 0.8.
