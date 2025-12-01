@@ -71,7 +71,7 @@ por_que(Maquina, Falha, Just) :-
 
 causa_raiz(Maquina, FalhaRaiz) :-
     falha_inferida(Maquina, FalhaRaiz),
-    \+ causa_indireta(_, FalhaRaiz)
+    \+ causa_indireta(_, FalhaRaiz).
 
 
 %arvore de diagnostico
