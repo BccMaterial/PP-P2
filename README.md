@@ -1,7 +1,69 @@
 # PP-P2
+
 Prova 2 de paradigmas em prolog
 
-Documentação do Sistema:
+## Documentação do Sistema:
+
+Módulos:
+- Equipamentos
+- Sintomas
+- Diagnostico
+- Acoes
+- Principal
+
+### Equipamentos
+
+Possui a definição dos casos de **componentes** e **subcomponentes**, onde:
+1. **Caso:** É o caso base, onde temos a relação direta entre componente e
+subcomponente;
+2. **Caso:** É o caso de relação indireta, onde temos uma recursão
+
+**Definições:**
+- subcomponente(X,Y)
+- subcomponente(X,Y)
+
+### Sintomas
+
+Possui a definição dos sintomas, dado um componente.
+
+**Definições:**
+- sintoma(Componente, Sintoma)
+- coletar_sintomas(Maquina, Sintomas)
+
+### Diagnostico
+
+Definição e lógicas de diagnóstico, onde, dado a máquina, e a falha, definimos o caso
+e retornamos o diagnóstico com uma porcentagem de confiabilidade.
+
+**Definições**:
+- taxa_propagacao_confianca(0.8).
+- falha_possivel(Comp, Falha)
+- falha_possivel(Pai, Falha)
+- causa_indireta(F1, F2)
+- causa_indireta(F1, F3)
+- falha_causada(F, F)
+- falha_causada(Base, Final)
+- falha_inferida(Comp, FalhaFinal)
+- diagnostico(Comp, Falha Conf)
+- diagnostico(Pai, Falha, NovaConf)
+- explicacao(Maquina, Falha, Txt)
+- por_que(Maquina, Falha, Just)
+- causa_raiz(Maquina, FalhaRaiz)
+- formata(Comp, Falha, Conf, Linha)
+- arvore_diagnostico(Maq, Saida)
+
+### Acoes
+
+São as definições do que deve ser feito caso haja a falha, retornando:
+- Prioridade
+- Ação
+Com isso, conseguimos enviar o que deve ser feito a partir de um problema dado.
+
+**Definições:**
+- mapear_severidade_para_prioridade(alta, urgente)
+- mapear_severidade_para_prioridade(media, moderada)
+- mapear_severidade_para_prioridade(baixa, baixa)
+- recomendar_acao(Maquina, Falha, Prioridade, Acao)
 
 ## Como executar o sistema
 
@@ -13,7 +75,17 @@ Para executar o código que gerará o `saída.txt`:
 swipl -s principal.pl -t entrada.txt
 ```
 
-### Exemplos de consultas e exemplos de resultados esperados
+### Principal
+
+É a nossa main, onde importamos os módulos, carregamos o arquivo `entrada.txt`,
+escrevemos o relatório no `saída.txt`.
+
+**Definições:**
+- main
+- carregar_base
+- executar_diagnostico
+
+## Exemplos de consultas e exemplos de resultados esperados
 
 % 1) Falhas possíveis em cada componente
 ?- falha_possivel(bomba_oleo, F).
