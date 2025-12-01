@@ -1,44 +1,18 @@
-%equipamentos.pl
+% Sistema de Diagnóstico Industrial em Prolog (Arquivo Único)
+% Extensão: Árvore de Diagnóstico
+
+% Base de Fatos:
+% HIERARQUIA DE COMPONENTES: componente(Pai, Filho)
 componente(maquina_a, motor_principal).
 componente(maquina_a, sistema_eletrico).
 componente(sistema_eletrico, sensor_temperatura).
 componente(sistema_eletrico, circuito_controle).
 componente(motor_principal, bomba_oleo).
 componente(motor_principal, eixo_rotacao).
-subcomponente(X, Y) :-
-    componente(X, Y).
+componente(bomba_oleo, valvula_retencao).
+componente(motor_principal, correia_transmissao).
 
-subcomponente(X, Y) :-
-    componente(X, Z),
-    subcomponente(Z, Y).
-
-% sintomas.pl
-
-
-% ============================
-% ASSOCIAÇÃO DE SINTOMAS A FALHAS PROVÁVEIS
-% relacao_sintoma_falha(Sintoma, Falha, Confianca)
-% ============================
-
-relacao_sintoma_falha(leitura_inconstante, sensor_inoperante, 0.8).
-relacao_sintoma_falha(ruido, vibracao_excessiva, 0.7).
-relacao_sintoma_falha(fluxo_reduzido, baixa_pressao_oleo, 0.9).
-
-% ============================
-% FALHAS CONHECIDAS (observadas diretamente)
-% falha_observada(Componente, Sintoma)
-% ============================
-falha_observada(sensor_temperatura, leitura_inconstante).
-falha_observada(bomba_oleo, fluxo_reduzido).
-
-
-
-
-%diagnostico.pl
-% ============================
-% FALHAS POSSÍVEIS
-% falha(Falha, Tipo, Severidade)
-% ============================
+% Falhas possíveis: falha(Falha, Tipo, Severidade)
 falha(superaquecimento, mecanica, alta).
 falha(baixa_pressao_oleo, mecanica, media).
 falha(curto_circuito, eletrica, alta).
@@ -46,50 +20,192 @@ falha(sensor_inoperante, eletrica, baixa).
 falha(vibracao_excessiva, mecanica, media).
 falha(parada_inesperada, geral, alta).
 falha(eixo_desalinhado, mecanica, media).
+falha(valvula_travada, mecanica, media).
+falha(correia_frouxa, mecanica, baixa).
+falha(mau_contato, eletrica, baixa).
 
+% Sintomas Observados(fato real): sintoma_observado(Componente, Sintoma)
+sintoma_observado(sensor_temperatura, leitura_inconstante).
+sintoma_observado(eixo_rotacao, ruido).
+sintoma_observado(bomba_oleo, fluxo_reduzido).
+sintoma_observado(valvula_retencao, vazamento).
+sintoma_observado(circuito_controle, led_vermelho_aceso).
 
-
-falha_possivel(Componente, Falha) :-
-    falha_observada(Componente, Sintoma),
-    relacao_sintoma_falha(Sintoma, Falha, _).
-falha_possivel(Componente, Falha) :-
-    subcomponente(Componente, X),
-    falha_possivel(X, Falha).
-
-
-% ============================
-% RELAÇÕES DE CAUSA E EFEITO
-% causa(FalhaCausa, FalhaConsequencia, Confianca)
-% Confiança: 0.0 a 1.0
-% ============================
+% Relações de causa e efeito: causa(FalhaCausa, FalhaConsequencia, Confianca)
 causa(baixa_pressao_oleo, superaquecimento, 0.7).
 causa(curto_circuito, parada_inesperada, 0.9).
-causa(sensor_inoperante, leitura_inconstante, 0.8).
 causa(vibracao_excessiva, eixo_desalinhado, 0.6).
-causa(superaquecimento, parada_inesperada, 0.9).
+causa(valvula_travada, baixa_pressao_oleo, 0.85).
 
-causa_indireta(F1, F2) :- causa(F1, F2, _).
+% Associação de sintomas a falhas: relacao_sintoma_falha(Sintoma, Falha, Confianca)
+relacao_sintoma_falha(leitura_inconstante, sensor_inoperante, 0.8).
+relacao_sintoma_falha(ruido, vibracao_excessiva, 0.7).
+relacao_sintoma_falha(fluxo_reduzido, baixa_pressao_oleo, 0.9).
+relacao_sintoma_falha(vazamento, valvula_travada, 0.95).
+relacao_sintoma_falha(led_vermelho_aceso, curto_circuito, 0.75).
+
+% Predicado adicional para consulta:
+sintoma(Componente, Sintoma) :-
+    sintoma_observado(Componente, Sintoma).
+
+
+% Regras de consulta:
+% subcomponente(X, Y): vê se Y está dentro de X.
+subcomponente(X, Y) :-
+    componente(X, Y). % Caso Base: Relação direta
+
+subcomponente(X, Y) :-
+    componente(X, Z),
+    subcomponente(Z, Y). % Caso Recursivo: Relação indireta
+
+% Regras de inferência:
+% falha_possivel(Componente, Falha): encontra a falha base(sintoma ou hierarquia).
+falha_possivel(Componente, Falha) :-
+    sintoma_observado(Componente, Sintoma),
+    relacao_sintoma_falha(Sintoma, Falha, _).
+
+falha_possivel(Pai, Falha) :-
+    componente(Pai, Filho),
+    falha_possivel(Filho, Falha).
+
+
+% falha_causada(FalhaBase, FalhaFinal)
+falha_causada(FalhaBase, Falha) :-
+    Falha = FalhaBase.
+
+falha_causada(FalhaBase, Falha) :-
+    causa_indireta(FalhaBase, Falha).
+
+
+% Principal predicado de consulta: combina hierarquia e causalidade
+falha_inferida(Componente, FalhaFinal) :-
+    falha_possivel(Componente, FalhaBase),
+    falha_causada(FalhaBase, FalhaFinal).
+
+
+% causa_indireta(F1, F2): Rastreia a cadeia de causas (fecho transitivo).
 causa_indireta(F1, F2) :-
-    causa(F1, F3, _),
-    causa_indireta(F3, F2).
+    causa(F1, F2, _). % Causa direta
 
+causa_indireta(F1, F3) :-
+    causa(F1, F2, _),
+    causa_indireta(F2, F3). % Causa indireta
+
+
+% causa_raiz/2: Encontra a FalhaRaiz (a que não é causada por outra).
 causa_raiz(Maquina, FalhaRaiz) :-
-    falha_possivel(Maquina, FalhaRaiz),
+    falha_inferida(Maquina, FalhaRaiz),
     \+ causa_indireta(_, FalhaRaiz).
-% ============================
-% SINTOMAS OBSERVADOS
-% sintoma(Componente, Sintoma)
-% ============================
-sintoma(sensor_temperatura, leitura_inconstante).
-sintoma(eixo_rotacao, ruido).
-sintoma(bomba_oleo, fluxo_reduzido).
 
-diagnostico(Componente, Falha, Confianca) :-
-    falha_observada(Componente, Sintoma),
-    relacao_sintoma_falha(Sintoma, Falha, Conf),
-    Confianca is Conf * 100.
 
+% Regras de sintoma e explicação
+% Fator de redução de confiança
+taxa_propagacao_confianca(0.8).
+
+% Diagnóstico com o nível de Confianca(Probabilidade Agregada)
 diagnostico(Componente, Falha, Confianca) :-
-    subcomponente(Componente, Sub),
-    diagnostico(Sub, Falha, ConfSub),
-    Confianca is ConfSub * 0.8.
+    sintoma_observado(Componente, Sintoma),
+    relacao_sintoma_falha(Sintoma, Falha, Confianca).
+
+diagnostico(Pai, Falha, NovaConfianca) :-
+    componente(Pai, Filho),
+    diagnostico(Filho, Falha, ConfiancaBase),
+    taxa_propagacao_confianca(Taxa),
+    NovaConfianca is ConfiancaBase * Taxa.
+
+
+% Coleta todos os sintomas observados na Maquina.
+coletar_sintomas(Maquina, Sintomas) :-
+    findall(
+        S,
+        ( subcomponente(Maquina, C), sintoma_observado(C, S) ),
+        ListaSintomas
+    ),
+    sort(ListaSintomas, Sintomas). % Remove repetidos
+
+
+% Explicação Simples:
+explicacao(Maquina, Falha, Justificativa) :-
+    falha_inferida(Maquina, Falha),
+    coletar_sintomas(Maquina, Sintomas),
+    format(atom(Justificativa),
+           'Falha (~w) deduzida por sintomas: ~w.',
+           [Falha, Sintomas]).
+
+
+% Explicação Detalhada:
+por_que(Maquina, Falha, Justificativa) :-
+    falha_inferida(Maquina, Falha),
+    coletar_sintomas(Maquina, Sintomas),
+   
+    findall(
+        (Sintoma, FalhaRel, Confianca),
+        ( member(Sintoma, Sintomas), relacao_sintoma_falha(Sintoma, FalhaRel, Confianca) ),
+        RelacoesDiretas
+    ),
+
+    findall(
+        Causa,
+        causa(Causa, Falha, _),
+        CausasConhecidas
+    ),
+
+    format(atom(J1), 'Falha (~w) inferida. Sintomas observados: ~w. ', [Falha, Sintomas]),
+    format(atom(J2), 'Relações conhecidas (sintoma -> falha): ~w. ', [RelacoesDiretas]),
+    format(atom(J3), 'Causas que podem levar a esta falha: ~w.', [CausasConhecidas]),
+
+    atom_concat(J1, J2, Temp),
+    atom_concat(Temp, J3, Justificativa).
+
+
+% Extensão: Árvore de Diagnóstico(Gerador de listagem hierárquica)
+% Auxiliar para formatar cada diagnóstico
+formata_diagnostico(Componente, Falha, Confianca, Linha) :-
+    ConfiancaFormatada is round(Confianca * 100), % Converte para %
+    format(atom(Linha), '~N- Componente: ~w -> Falha: ~w (~w%)', [Componente, Falha, ConfiancaFormatada]).
+
+% arvore_diagnostico(Maquina, Arvore)
+% Gera uma listagem formatada de todos os diagnósticos possíveis na Máquina e subcomponentes.
+arvore_diagnostico(Maquina, Arvore) :-
+    % Coleta todos os componentes(a própria maquina e seus subcomponentes)
+    findall(
+        C,
+        ( Maquina = C ; subcomponente(Maquina, C) ),
+        Componentes
+    ),
+   
+    % Para cada componente, coleta todos os diagnósticos com confiança
+    findall(
+        LinhaFormatada,
+        ( member(Comp, Componentes),
+          diagnostico(Comp, Falha, Confianca),
+          formata_diagnostico(Comp, Falha, Confianca, LinhaFormatada)
+        ),
+        LinhasDiagnostico
+    ),
+   
+    % Combina as linhas em um único átomo de saída.
+    atomic_list_concat([Maquina, '\n', '--- DETALHES ---' | LinhasDiagnostico], '\n', Arvore).
+
+
+% Regras de ações:
+% Base de fatos
+acao_corretiva(superaquecimento, 'Verificar sistema de refrigeração e nível de óleo.').
+acao_corretiva(baixa_pressao_oleo, 'Verificar bomba de óleo e nível do reservatório.').
+acao_corretiva(curto_circuito, 'Isolar o circuito de controle e inspecionar fiação.').
+acao_corretiva(sensor_inoperante, 'Calibrar ou substituir sensor.').
+acao_corretiva(vibracao_excessiva, 'Verificar balanceamento e fixação de componentes.').
+acao_corretiva(parada_inesperada, 'Revisão geral do sistema elétrico e mecânico - URGENTE.').
+acao_corretiva(eixo_desalinhado, 'Realinhar eixo de rotação.').
+
+% Mapeia a severidade para a prioridade
+mapear_severidade_para_prioridade(alta, urgente).
+mapear_severidade_para_prioridade(media, moderada).
+mapear_severidade_para_prioridade(baixa, baixa).
+
+% Sugere a Acao e define a Prioridade.
+recomendar_acao(Maquina, Falha, Prioridade, Acao) :-
+    falha_inferida(Maquina, Falha),
+    falha(Falha, _, Severidade),
+    acao_corretiva(Falha, Acao),
+    mapear_severidade_para_prioridade(Severidade, Prioridade).
