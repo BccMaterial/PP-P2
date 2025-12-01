@@ -3,13 +3,18 @@ Prova 2 de paradigmas em prolog
 
 Documentação do Sistema:
 
-como executar o sistema:
+## Como executar o sistema
 
+Para executar o sistema, você deve possuir o pacote swi-prolog em seu sistema,
+onde é possível executar `swipl`.
 
-como usar os arquivos de entrada e saída:
+Para executar o código que gerará o `saída.txt`:
+```bash
+swipl -s principal.pl -t entrada.txt
+```
 
+### Exemplos de consultas e exemplos de resultados esperados
 
-exemplos de consultas e exemplos de resultados esperados:  
 % 1) Falhas possíveis em cada componente
 ?- falha_possivel(bomba_oleo, F).
 F = baixa_pressao_oleo.
