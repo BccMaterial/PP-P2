@@ -1,6 +1,6 @@
-% Predicado de Atalho:
-sintoma(Componente, Sintoma) :-
-    sintoma_observado(Componente, Sintoma).
+:- module(equipamentos, [
+    subcomponente/2
+]).
 
 % subcomponente(X, Y): Verifica se Y está dentro de X(direto ou indireto).
 subcomponente(X, Y) :-
