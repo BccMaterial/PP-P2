@@ -1,0 +1,60 @@
+=== DIAGNÓSTICO DA MÁQUINA ===
+maquina_a
+
+--- DIAGNÓSTICOS ---
+- maquina_a: baixa_pressao_oleo (58%)
+- maquina_a: valvula_travada (49%)
+- maquina_a: vibracao_excessiva (45%)
+- maquina_a: sensor_inoperante (51%)
+- maquina_a: curto_circuito (48%)
+- motor_principal: baixa_pressao_oleo (72%)
+- motor_principal: valvula_travada (61%)
+- motor_principal: vibracao_excessiva (56%)
+- sistema_eletrico: sensor_inoperante (64%)
+- sistema_eletrico: curto_circuito (60%)
+- bomba_oleo: baixa_pressao_oleo (90%)
+- bomba_oleo: valvula_travada (76%)
+- eixo_rotacao: vibracao_excessiva (70%)
+- valvula_retencao: valvula_travada (95%)
+- sensor_temperatura: sensor_inoperante (80%)
+- circuito_controle: curto_circuito (75%)
+
+Falha: baixa_pressao_oleo
+Prioridade: moderada
+Ação: Verificar bomba de óleo e nível do reservatório.
+
+Falha: superaquecimento
+Prioridade: urgente
+Ação: Verificar sistema de refrigeração e nível de óleo.
+
+Falha: valvula_travada
+Prioridade: moderada
+Ação: Desmontar e limpar a válvula; verificar obstruções.
+
+Falha: baixa_pressao_oleo
+Prioridade: moderada
+Ação: Verificar bomba de óleo e nível do reservatório.
+
+Falha: superaquecimento
+Prioridade: urgente
+Ação: Verificar sistema de refrigeração e nível de óleo.
+
+Falha: vibracao_excessiva
+Prioridade: moderada
+Ação: Verificar balanceamento e fixação de componentes.
+
+Falha: eixo_desalinhado
+Prioridade: moderada
+Ação: Realinhar eixo de rotação.
+
+Falha: sensor_inoperante
+Prioridade: baixa
+Ação: Calibrar ou substituir sensor.
+
+Falha: curto_circuito
+Prioridade: urgente
+Ação: Isolar o circuito de controle e inspecionar fiação.
+
+Falha: parada_inesperada
+Prioridade: urgente
+Ação: Revisão geral do sistema elétrico e mecânico - URGENTE.
