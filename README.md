@@ -9,7 +9,7 @@ como executar o sistema:
 como usar os arquivos de entrada e saída:
 
 
-exemplos de consultas e exemplos de resultados esperados:
+exemplos de consultas e exemplos de resultados esperados:  
 % 1) Falhas possíveis em cada componente
 ?- falha_possivel(bomba_oleo, F).
 F = baixa_pressao_oleo.
