@@ -68,6 +68,12 @@ por_que(Maquina, Falha, Just) :-
     atom_concat(J1, J2, T),
     atom_concat(T, J3, Just).
 
+
+causa_raiz(Maquina, FalhaRaiz) :-
+    falha_inferida(Maquina, FalhaRaiz),
+    \+ causa_indireta(_, FalhaRaiz)
+
+
 %arvore de diagnostico
 formata(Comp, Falha, Conf, Linha) :-
     P is round(Conf*100),
