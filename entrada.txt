@@ -1,0 +1,53 @@
+
+componente(maquina_a, motor_principal).
+componente(maquina_a, sistema_eletrico).
+componente(sistema_eletrico, sensor_temperatura).
+componente(sistema_eletrico, circuito_controle).
+componente(motor_principal, bomba_oleo).
+componente(motor_principal, eixo_rotacao).
+componente(motor_principal, correia_transmissao).
+componente(bomba_oleo, valvula_retencao).
+
+
+falha(superaquecimento, mecanica, alta).
+falha(baixa_pressao_oleo, mecanica, media).
+falha(curto_circuito, eletrica, alta).
+falha(sensor_inoperante, eletrica, baixa).
+falha(vibracao_excessiva, mecanica, media).
+falha(parada_inesperada, geral, alta).
+falha(eixo_desalinhado, mecanica, media).
+falha(valvula_travada, mecanica, media).
+falha(correia_frouxa, mecanica, baixa).
+falha(mau_contato, eletrica, baixa).
+
+
+sintoma_observado(sensor_temperatura, leitura_inconstante).
+sintoma_observado(eixo_rotacao, ruido).
+sintoma_observado(bomba_oleo, fluxo_reduzido).
+sintoma_observado(valvula_retencao, vazamento).
+sintoma_observado(circuito_controle, led_vermelho_aceso).
+
+
+relacao_sintoma_falha(leitura_inconstante, sensor_inoperante, 0.8).
+relacao_sintoma_falha(ruido, vibracao_excessiva, 0.7).
+relacao_sintoma_falha(fluxo_reduzido, baixa_pressao_oleo, 0.9).
+relacao_sintoma_falha(vazamento, valvula_travada, 0.95).
+relacao_sintoma_falha(led_vermelho_aceso, curto_circuito, 0.75).
+
+
+causa(baixa_pressao_oleo, superaquecimento, 0.7).
+causa(curto_circuito, parada_inesperada, 0.9).
+causa(vibracao_excessiva, eixo_desalinhado, 0.6).
+causa(valvula_travada, baixa_pressao_oleo, 0.85).
+
+
+acao_corretiva(superaquecimento, 'Verificar sistema de refrigeração e nível de óleo.').
+acao_corretiva(baixa_pressao_oleo, 'Verificar bomba de óleo e nível do reservatório.').
+acao_corretiva(curto_circuito, 'Isolar o circuito de controle e inspecionar fiação.').
+acao_corretiva(sensor_inoperante, 'Calibrar ou substituir sensor.').
+acao_corretiva(vibracao_excessiva, 'Verificar balanceamento e fixação de componentes.').
+acao_corretiva(parada_inesperada, 'Revisão geral do sistema elétrico e mecânico - URGENTE.').
+acao_corretiva(eixo_desalinhado, 'Realinhar eixo de rotação.').
+acao_corretiva(valvula_travada, 'Desmontar e limpar a válvula; verificar obstruções.').
+acao_corretiva(correia_frouxa, 'Ajustar tensão da correia de transmissão.').
+acao_corretiva(mau_contato, 'Apertar conectores e limpar oxidação dos terminais.').
